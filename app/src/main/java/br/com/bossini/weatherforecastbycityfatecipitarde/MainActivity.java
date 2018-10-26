@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -23,17 +24,27 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.interfaces.RSAKey;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText locationEditText;
+    private List<Weather> previsoes;
+    private WeatherAdapter adapter;
+    private ListView weatherListView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        previsoes = new ArrayList<>();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         locationEditText = findViewById(R.id.locationEditText);
+        adapter = new WeatherAdapter(this, previsoes);
+        weatherListView = findViewById(R.id.weatherListView);
+        weatherListView.setAdapter(adapter);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,11 +52,10 @@ public class MainActivity extends AppCompatActivity {
                 String cidade =
                         locationEditText.getEditableText().toString();
                 String endereco =
-                        getString(R.string.web_service_url);
-                endereco = endereco + cidade;
-                endereco += "&APPID=";
-                endereco += getString(R.string.api_key);
-                endereco += "&units=metric";
+                        getString(R.string.web_service_url,
+                                cidade, getString(R.string.api_key),
+                                getString(R.string.units),
+                                getString(R.string.lang));
                 new ObtemTemperaturas().execute(endereco);
             }
         });
@@ -83,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String jsonS) {
             try{
+                previsoes.clear();
                 JSONObject json = new JSONObject(jsonS);
                 JSONArray list = json.getJSONArray("list");
                 for (int i = 0; i < list.length(); i++){
@@ -96,7 +107,12 @@ public class MainActivity extends AppCompatActivity {
                    JSONObject unicoNoWeather = weather.getJSONObject(0);
                    String description = unicoNoWeather.getString("description");
                    String icon = unicoNoWeather.getString("icon");
+                   Weather w = new Weather (dt, temp_min, temp_max, humidity,
+                                                            description, icon);
+                   previsoes.add(w);
                 }
+                adapter.notifyDataSetChanged();
+
             }
             catch (JSONException e){
                e.printStackTrace();

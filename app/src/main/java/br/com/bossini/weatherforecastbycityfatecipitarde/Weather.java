@@ -24,7 +24,7 @@ public class Weather {
         this.maxTemp = numberFormat.format(maxTemp);
         NumberFormat percentFormat =
                 NumberFormat.getPercentInstance();
-        this.humidity = percentFormat.format(humidity);
+        this.humidity = percentFormat.format(humidity / 100);
         this.description = description;
         this.iconName = iconName;
     }
@@ -36,7 +36,7 @@ public class Weather {
         agora.add(Calendar.MILLISECOND,
                 timeZone.getOffset(agora.getTimeInMillis()));
         //SimpleDateFormat simpleDateFormat =
-                return new SimpleDateFormat("EEEE", Locale.getDefault())
+                return new SimpleDateFormat("EEEE, hh:MM", Locale.getDefault())
                         .format(agora.getTime());
         //return simpleDateFormat.format(agora.getTime());
     }
